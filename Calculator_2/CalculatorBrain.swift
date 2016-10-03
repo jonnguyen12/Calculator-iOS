@@ -24,11 +24,17 @@ class CalculatorBrain {
         "±": Operation.UnaryOperation({-$0}),
         "√": Operation.UnaryOperation (sqrt),
         "cos": Operation.UnaryOperation (cos),
+        "sin": Operation.UnaryOperation (sin),
+        "tan": Operation.UnaryOperation (tan),
         "×": Operation.BinaryOperation({$0 * $1}),
         "÷": Operation.BinaryOperation({$0 / $1}),
         "−": Operation.BinaryOperation({$0 - $1}),
         "+": Operation.BinaryOperation({$0 + $1}),
-        "=": Operation.Equals
+        "=": Operation.Equals,
+        "log": Operation.UnaryOperation(log10),
+        "ln": Operation.UnaryOperation(log2),
+        "%": Operation.UnaryOperation({$0/100})
+        
     ]
     
     private enum Operation {
