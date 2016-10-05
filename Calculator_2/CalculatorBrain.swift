@@ -12,71 +12,77 @@ import Foundation
 class CalculatorBrain {
     private var accumulator = 0.0
     private var internalProgram = [AnyObject]()
+    private var currentPrecedence = Int.max
+    private var isPartialResult: Bool {
+        
+    }
     
     func setOperand (_ operand: Double) {
         accumulator = operand
         internalProgram.append(operand as AnyObject)
+        accumulatorDescription = String(format: "%g", operand)
     }
-    
-    private var operations: Dictionary<String, Operation> = [
-        "π": Operation.Constant(M_PI),
-        "e": Operation.Constant (M_E),
-        "±": Operation.UnaryOperation({-$0}),
-        "√": Operation.UnaryOperation (sqrt),
-        "cos": Operation.UnaryOperation (cos),
-        "sin": Operation.UnaryOperation (sin),
-        "tan": Operation.UnaryOperation (tan),
-        "×": Operation.BinaryOperation({$0 * $1}),
-        "÷": Operation.BinaryOperation({$0 / $1}),
-        "−": Operation.BinaryOperation({$0 - $1}),
-        "+": Operation.BinaryOperation({$0 + $1}),
-        "=": Operation.Equals,
-        "log": Operation.UnaryOperation(log10),
-        "ln": Operation.UnaryOperation(log2),
-        "%": Operation.UnaryOperation({$0/100})
-        
-    ]
     
     private enum Operation {
         case Constant(Double)
-        case UnaryOperation((Double) -> Double)
-        case BinaryOperation((Double, Double) -> Double)
+        case UnaryOperation((Double) -> Double, (String) -> String)
+        case BinaryOperation((Double, Double) -> Double, (String, String) -> String, Int)
         case Equals
         
     }
-    
-    func performOperation(_ symbol: String) {
-        internalProgram.append(symbol as AnyObject)
-        if let operation = operations[symbol] {
-            switch operation {
-            case .Constant (let value): accumulator = value
-            case .UnaryOperation (let function): accumulator = function(accumulator)
-            case .BinaryOperation (let function):
-                executePendingBinaryOperation()
-                pending = PendingBinaryOperationInfo(binaryFunction: function, firstOperand: accumulator)
-            case .Equals:
-                executePendingBinaryOperation()
-                
-            }
-        }
-    }
-    
-    private func executePendingBinaryOperation() {
-        if pending != nil {
-            accumulator = pending!.binaryFunction(pending!.firstOperand, accumulator)
-            pending = nil
-        }
-    }
-    
+
     private var pending: PendingBinaryOperationInfo?
     
     private struct PendingBinaryOperationInfo {
         var binaryFunction: (Double, Double) -> Double
         var firstOperand: Double
+        var functionDescription: (String, String) -> String
+        var operandDescription: String
     }
     
-    typealias PropertyList = AnyObject
+    private var operations: Dictionary<String, Operation> = [
+        "π": Operation.Constant(M_PI),
+        "e": Operation.Constant (M_E),
+        "±": Operation.UnaryOperation({-$0}, {"-(" + $0 + ")"}),
+        "√": Operation.UnaryOperation (sqrt, {"√" + $0 + ")"}),
+        "cos": Operation.UnaryOperation (cos, {"cos(" + $0 + ")"}),
+        "sin": Operation.UnaryOperation (sin, {"sin(" + $0 + ")"}),
+        "tan": Operation.UnaryOperation (tan, {"tan(" + $0 + ")"}),
+        "×": Operation.BinaryOperation({$0 * $1}, {$0 + " x " + $1}, 1),
+        "÷": Operation.BinaryOperation({$0 / $1}, {$0 + " / " + $1}, 1),
+        "−": Operation.BinaryOperation({$0 - $1}, {$0 + " - " + $1}, 0),
+        "+": Operation.BinaryOperation({$0 + $1}, {$0 + " + " + $1}, 0),
+        "=": Operation.Equals,
+        "log": Operation.UnaryOperation(log10, {"log10(" + $0 + ")"}),
+        "ln": Operation.UnaryOperation(log2, {"log2(" + $0 + ")"}),
+        "%": Operation.UnaryOperation({$0/100}, {"%(" + $0 + ")"})
+        
+    ]
     
+    var description: String {
+        get {
+            if pending == nil {
+                return accumulatorDescription
+            } else {
+                return pending!.functionDescription(pending!.operandDescription, pending!.operandDescription != accumulatorDescription ? accumulatorDescription : "" )
+            }
+        }
+    }
+    
+    private var accumulatorDescription = "0" {
+        didSet {
+            if pending == nil {
+                currentPrecedence = Int.max
+            }
+        }
+    }
+    
+    var result: Double {
+        get {
+            return accumulator
+        }
+    }
+
     var program: PropertyList {
         get {
             return internalProgram as CalculatorBrain.PropertyList
@@ -94,8 +100,49 @@ class CalculatorBrain {
                 }
             }
         }
-
+        
     }
+
+    
+    func performOperation(_ symbol: String) {
+        internalProgram.append(symbol as AnyObject)
+        if let operation = operations[symbol] {
+            switch operation {
+            case .Constant (let value):
+                accumulator = value
+                accumulatorDescription = symbol
+            case .UnaryOperation (let function, let funcDescription):
+                accumulator = function(accumulator)
+                accumulatorDescription = funcDescription(accumulatorDescription)
+            case .BinaryOperation (let function, let funcDescription, let precedence):
+                executePendingBinaryOperation()
+                if currentPrecedence < precedence {
+                    accumulatorDescription = "(" + accumulatorDescription + ")"
+                }
+                currentPrecedence = precedence
+                pending = PendingBinaryOperationInfo(binaryFunction: function,
+                                                     firstOperand: accumulator,
+                                                     functionDescription: funcDescription,
+                                                     operandDescription: accumulatorDescription)
+                
+            case .Equals:
+                executePendingBinaryOperation()
+                
+            }
+        }
+    }
+    
+    private func executePendingBinaryOperation() {
+        if pending != nil {
+            accumulator = pending!.binaryFunction(pending!.firstOperand, accumulator)
+            pending = nil
+            accumulatorDescription = pending!.functionDescription(pending!.operandDescription, accumulatorDescription)
+        }
+    }
+    
+    
+    typealias PropertyList = AnyObject
+    
     
     func clear() {
         accumulator = 0.0
@@ -103,10 +150,5 @@ class CalculatorBrain {
         internalProgram.removeAll()
     }
     
-    var result: Double {
-        get {
-            return accumulator
-        }
-    }
     
 }
