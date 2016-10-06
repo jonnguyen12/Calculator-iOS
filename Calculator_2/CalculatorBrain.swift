@@ -14,7 +14,7 @@ class CalculatorBrain {
     private var internalProgram = [AnyObject]()
     private var currentPrecedence = Int.max
     private var isPartialResult: Bool {
-        
+        return pending == nil ? false : true
     }
     
     func setOperand (_ operand: Double) {
