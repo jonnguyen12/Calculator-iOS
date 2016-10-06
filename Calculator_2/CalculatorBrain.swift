@@ -14,7 +14,7 @@ class CalculatorBrain {
     private var internalProgram = [AnyObject]()
     private var currentPrecedence = Int.max
     private var isPartialResult: Bool {
-        return pending == nil ? false : true
+        return pending != nil
     }
     
     func setOperand (_ operand: Double) {
@@ -28,6 +28,7 @@ class CalculatorBrain {
         case UnaryOperation((Double) -> Double, (String) -> String)
         case BinaryOperation((Double, Double) -> Double, (String, String) -> String, Int)
         case Equals
+        case Clear
         
     }
 
@@ -43,6 +44,7 @@ class CalculatorBrain {
     private var operations: Dictionary<String, Operation> = [
         "π": Operation.Constant(M_PI),
         "e": Operation.Constant (M_E),
+        "C": Operation.Clear,
         "±": Operation.UnaryOperation({-$0}, {"-(" + $0 + ")"}),
         "√": Operation.UnaryOperation (sqrt, {"√" + $0 + ")"}),
         "cos": Operation.UnaryOperation (cos, {"cos(" + $0 + ")"}),
@@ -61,10 +63,10 @@ class CalculatorBrain {
     
     var description: String {
         get {
-            if pending == nil {
-                return accumulatorDescription
+            if !isPartialResult {
+                return accumulatorDescription + " ="
             } else {
-                return pending!.functionDescription(pending!.operandDescription, pending!.operandDescription != accumulatorDescription ? accumulatorDescription : "" )
+                return pending!.functionDescription(pending!.operandDescription, pending!.operandDescription != accumulatorDescription ? accumulatorDescription : "..." )
             }
         }
     }
@@ -127,6 +129,8 @@ class CalculatorBrain {
                 
             case .Equals:
                 executePendingBinaryOperation()
+            case .Clear:
+                clear()
                 
             }
         }
@@ -135,8 +139,8 @@ class CalculatorBrain {
     private func executePendingBinaryOperation() {
         if pending != nil {
             accumulator = pending!.binaryFunction(pending!.firstOperand, accumulator)
-            pending = nil
             accumulatorDescription = pending!.functionDescription(pending!.operandDescription, accumulatorDescription)
+            pending = nil
         }
     }
     
