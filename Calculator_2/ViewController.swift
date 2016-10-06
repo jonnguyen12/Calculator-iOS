@@ -11,6 +11,7 @@ import UIKit
 class ViewController: UIViewController {
 
     @IBOutlet private weak var display: UILabel!
+    @IBOutlet weak var historyLabel: UILabel!
     
     private var userIsInTheMiddleOfTyping = false
     
@@ -21,6 +22,7 @@ class ViewController: UIViewController {
             if !(textCurrentlyInDisplay.range(of: ".") != nil && digit == ".") {
                 display.text = textCurrentlyInDisplay + digit
             }
+            historyLabel.text = brain.description
         } else {
             display.text = digit
             if digit == "." {
@@ -48,6 +50,7 @@ class ViewController: UIViewController {
         
         set {
             display.text = String(newValue)
+            historyLabel.text = brain.description + (brain.isPartialResult ? "..." : " =")
         }
     }
     

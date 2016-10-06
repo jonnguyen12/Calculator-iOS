@@ -13,7 +13,7 @@ class CalculatorBrain {
     private var accumulator = 0.0
     private var internalProgram = [AnyObject]()
     private var currentPrecedence = Int.max
-    private var isPartialResult: Bool {
+    var isPartialResult: Bool {
         return pending != nil
     }
     
@@ -64,9 +64,9 @@ class CalculatorBrain {
     var description: String {
         get {
             if !isPartialResult {
-                return accumulatorDescription + " ="
+                return accumulatorDescription
             } else {
-                return pending!.functionDescription(pending!.operandDescription, pending!.operandDescription != accumulatorDescription ? accumulatorDescription : "..." )
+                return pending!.functionDescription(pending!.operandDescription, pending!.operandDescription != accumulatorDescription ? accumulatorDescription : "")
             }
         }
     }
