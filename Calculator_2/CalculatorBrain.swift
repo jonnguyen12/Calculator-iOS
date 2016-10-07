@@ -49,7 +49,7 @@ class CalculatorBrain {
         "e": Operation.Constant (M_E),
         "C": Operation.Clear,
         "±": Operation.UnaryOperation({-$0}, {"-(" + $0 + ")"}),
-        "√": Operation.UnaryOperation (sqrt, {"√" + $0 + ")"}),
+        "√": Operation.UnaryOperation (sqrt, {"√" + "(" + $0 + ")"}),
         "cos": Operation.UnaryOperation (cos, {"cos(" + $0 + ")"}),
         "sin": Operation.UnaryOperation (sin, {"sin(" + $0 + ")"}),
         "tan": Operation.UnaryOperation (tan, {"tan(" + $0 + ")"}),

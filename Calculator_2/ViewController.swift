@@ -49,7 +49,11 @@ class ViewController: UIViewController {
         }
         
         set {
-            display.text = String(newValue!)
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            formatter.maximumFractionDigits = 6
+            let number = NSNumber(value: newValue!)
+            display.text = formatter.string(from: number)
             historyLabel.text = brain.description + (brain.isPartialResult ? "..." : " =")
         }
     }
