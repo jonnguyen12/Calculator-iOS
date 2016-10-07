@@ -40,9 +40,6 @@ class CalculatorBrain {
         var operandDescription: String
     }
     
-    func backSpace() {
-        
-    }
     
     private var operations: Dictionary<String, Operation> = [
         "π": Operation.Constant(M_PI),
