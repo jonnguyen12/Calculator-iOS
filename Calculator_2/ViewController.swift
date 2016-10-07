@@ -43,13 +43,13 @@ class ViewController: UIViewController {
     @IBAction func save(_ sender: UIButton) {
         savedProgram = brain.program
     }
-    private var displayValue: Double {
+    private var displayValue: Double? {
         get {
-            return Double(display.text!)!
+            return Double(display.text!)
         }
         
         set {
-            display.text = String(newValue)
+            display.text = String(newValue!)
             historyLabel.text = brain.description + (brain.isPartialResult ? "..." : " =")
         }
     }
@@ -71,7 +71,7 @@ class ViewController: UIViewController {
     
     @IBAction private func performOperation(_ sender: UIButton) {
         if userIsInTheMiddleOfTyping {
-            brain.setOperand(displayValue)
+            brain.setOperand(displayValue!)
             userIsInTheMiddleOfTyping = false
         }
         
