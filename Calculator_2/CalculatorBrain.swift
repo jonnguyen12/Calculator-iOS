@@ -29,7 +29,6 @@ class CalculatorBrain {
         case BinaryOperation((Double, Double) -> Double, (String, String) -> String, Int)
         case Equals
         case Clear
-        
     }
 
     private var pending: PendingBinaryOperationInfo?
@@ -39,6 +38,10 @@ class CalculatorBrain {
         var firstOperand: Double
         var functionDescription: (String, String) -> String
         var operandDescription: String
+    }
+    
+    func backSpace() {
+        
     }
     
     private var operations: Dictionary<String, Operation> = [

@@ -53,6 +53,19 @@ class ViewController: UIViewController {
             historyLabel.text = brain.description + (brain.isPartialResult ? "..." : " =")
         }
     }
+    @IBAction func backSpace(_ sender: UIButton) {
+        if (userIsInTheMiddleOfTyping && (display.text?.isEmpty)!) || display.text == "0" {
+            display.text = "0"
+            return
+        }
+        
+        var currentText = display.text!
+        currentText.remove(at: currentText.startIndex)
+        if (currentText.isEmpty) {
+            currentText = "0"
+        }
+        display.text = currentText
+    }
     
     private var brain = CalculatorBrain()
     
