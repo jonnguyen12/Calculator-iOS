@@ -29,6 +29,7 @@ class CalculatorBrain {
         case BinaryOperation((Double, Double) -> Double, (String, String) -> String, Int)
         case Equals
         case Clear
+        case Rand(() -> Double)
     }
 
     private var pending: PendingBinaryOperationInfo?
@@ -42,6 +43,7 @@ class CalculatorBrain {
     
     
     private var operations: Dictionary<String, Operation> = [
+        "Rand": Operation.Rand(drand48),
         "π": Operation.Constant(M_PI),
         "e": Operation.Constant (M_E),
         "C": Operation.Clear,
@@ -131,7 +133,8 @@ class CalculatorBrain {
                 executePendingBinaryOperation()
             case .Clear:
                 clear()
-                
+            case .Rand(let function):
+                accumulator = function()
             }
         }
     }
